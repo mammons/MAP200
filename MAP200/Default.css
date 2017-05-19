@@ -1,0 +1,25 @@
+﻿/*.values{
+    display: flex;
+    align-content:center;
+}
+
+.value{
+    display:flex;
+    justify-content: space-around;
+    width: 30%;
+}*/
+body{
+    margin-top: 100px;
+}
+
+.btn{
+    margin: 5px;
+}
+
+.logTextBox{
+    width: 500px;
+}
+
+.btn-center{
+    text-align:center;
+}
