@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using JDSU.MAP200_PCT.Interop;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace MAP200
 {
@@ -99,7 +100,10 @@ namespace MAP200
                 }
 
                 double insertionLoss = IMeas.GetIL();
+                //double returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, 0.82, 0.82);
+                //double returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, 0, 0);
                 double returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, 0.82, 0.82);
+
                 double length = IMeas.GetLength();
 
                 results.Add(string.Format("Insertion Loss: {0}", insertionLoss.ToString()));
@@ -112,6 +116,7 @@ namespace MAP200
             {
                 results.Add("PCT not ready for test");
             }
+            var jsonResults = JsonConvert.SerializeObject(results);
             return results;
         }
 

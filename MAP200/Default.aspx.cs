@@ -23,14 +23,7 @@ namespace MAP200
         {
             string status;
 
-            if (map200.isConnected)
-            {
-                status = map200.sendCommand("IDN?", requestResponse: true);
-            }
-            else
-            {
-                status = map200.openConnection();
-            }
+            status = map200.sendCommand("IDN?", requestResponse: true);
             logTextBox.Text = status;
         }
 
@@ -72,7 +65,7 @@ namespace MAP200
         {
             List<string> testResults = new List<string>();
             testResults = (List<string>)map200.pct.runTest();
-            populateLogWithResults(testResults);
+            populateFieldsWithResults(testResults);
         }
 
 
@@ -81,20 +74,14 @@ namespace MAP200
             writeToLog(map200.verbosePctStatus);
         }
 
-        private void populateLogWithResults(IEnumerable<string> results)
+        private void populateFieldsWithResults(IEnumerable<string> results)
         {
-            if(results != null)
-            {
-                foreach(var result in results)
-                {
-                    writeToLog(result);
-                }
-            }
+
         }
 
         private void writeToLog(string str)
         {
-            logTextBox.Text = str + Environment.NewLine;
+            logTextBox.Text += str + Environment.NewLine;
         }
     }
 }

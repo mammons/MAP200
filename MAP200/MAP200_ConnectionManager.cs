@@ -53,13 +53,44 @@ namespace MAP200
             }
         }
 
-        public void manageBaseConnection()
+        public string sendCommandToCmr(string command, bool requestResponse)
         {
-            if(ioObject.IO == null)
+            openConnectionToCmr();
+
+            string response;
+            try
             {
-                openConnectionToCmr();
+                ioObject.WriteString(command + "\n", true);
+
+                if (requestResponse)
+                {
+                    //ReadString parameter corresponds to timeout
+                    response = ioObject.IO.ReadString(5000);
+                    return response;
+                }
+                else
+                {
+                    return "Command sent";
+                }
             }
-            else if(ioObject.IO != null && ioObject.IO.)
+            catch (Exception ex)
+            {
+                return "An error occurred: " + ex.Message;
+            }
+            finally
+            {
+                try { ioObject.IO.Close(); }
+                catch { }
+            }
         }
+
+        //public void manageBaseConnection()
+        //{
+        //    if (ioObject.IO == null)
+        //    {
+        //        openConnectionToCmr();
+        //    }
+        //    else if (ioObject.IO != null && ioObject.IO.) { }
+        //}
     }
 }
