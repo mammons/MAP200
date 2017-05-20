@@ -35,11 +35,12 @@
             </div>
             <div class="row">
                 <div class="btn-group btn-center">
-                <asp:Button ID="statusBtn" CssClass="btn btn-default" runat="server" Text="PCT Status" OnClick="statusBtn_Click" />
-                <asp:Button ID="startPctBtn" CssClass="btn btn-primary" runat="server" Text="Start PCT" />
-                <asp:Button ID="stopPctBtn" runat="server" CssClass="btn btn-danger" Text="Stop PCT" />
-                <asp:Button ID="runBtn" runat="server" CssClass="btn btn-default" Text="Run Test" />
-                    </div>
+                    <asp:Button ID="statusBtn" runat="server" Text="MAP200 Status" CssClass="btn btn-default" OnClick="statusBtn_Click" />
+                    <asp:Button ID="pctStatusBtn" runat="server" Text="PCT Status" CssClass="btn btn-info" OnClick="pctStatusBtn_Click" />
+                    <asp:Button ID="startPctBtn" runat="server" Text="Start PCT" CssClass="btn btn-primary" OnClick="startPctBtn_Click" />
+                    <asp:Button ID="stopPctBtn" runat="server" Text="Stop PCT" CssClass="btn btn-danger" OnClick="stopPctBtn_Click" />
+                    <asp:Button ID="runBtn" runat="server" Text="Run Test" CssClass="btn btn-default" OnClick="runBtn_Click" />
+                </div>
             </div>
             <div class="row row--textBox control-label">
                 <asp:Label Text="Log" runat="server" AssociatedControlID="logTextBox" />

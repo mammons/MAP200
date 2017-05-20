@@ -147,7 +147,8 @@
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
     <Compile Include="MAP200.cs" />
-    <Compile Include="MAP200_PCT.cs" />
+    <Compile Include="MAP200_ConnectionManager.cs" />
+    <Compile Include="PCT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
