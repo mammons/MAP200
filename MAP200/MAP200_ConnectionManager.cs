@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Ivi.Visa.Interop;
+using System.Threading.Tasks;
 
 namespace MAP200
 {
@@ -79,7 +80,11 @@ namespace MAP200
             }
             finally
             {
-                try { ioObject.IO.Close(); }
+                try {
+                    //seems like close takes a while and doesn't return anything anyway so this should put it on another
+                    //thread so it doesn't block
+                    TaskEx.Run(() => ioObject.IO.Close());
+                }
                 catch { }
             }
         }

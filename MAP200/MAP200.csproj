@@ -155,6 +155,9 @@
     <Compile Include="MAP200_Results.cs" />
     <Compile Include="PCT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestSetMessage.cs" />
+    <Compile Include="TestSetMessageHeader.cs" />
+    <Compile Include="TestSetMessageResponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

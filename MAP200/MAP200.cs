@@ -18,7 +18,6 @@ namespace MAP200
         public string verbosePctStatus {
             get { return getVerbosePctStatus(); }
         }
-        public bool hasPctRunning { get; set; }
         public bool isConnected { get; set; }
         public bool isReadyToTest { get; set; }
         public MAP200_ConnectionManager conman { get; set; }
@@ -35,34 +34,23 @@ namespace MAP200
            return conman.sendCommandToCmr(command, requestResponse);            
         }
 
-        ///// <summary>
-        ///// Opens a connection to the MAP200 chassis. If no IP string is passed, uses the current default IP of 135.84.72.169
-        ///// </summary>
-        ///// <returns>Returns the IDN? of the test set if successful. Otherwise returns the exception</returns>
-        //public string openConnection()
-        //{
-        //        //Try and retrieve set info and return success message
-        //        setInfo = sendCommand("IDN?", requestResponse: true);
-        //        return string.Format("{0} connected!", setInfo.Trim());
-
-        //}
-
         public string getVerbosePctStatus()
         {
-            string setResponse;
             string status;
 
-            setResponse = getPctStatus();
-
-            status = hasPctRunning ? "PCT Ready" : "PCT needs to be started";
+            status = hasPctRunning() ? "PCT Ready" : "PCT needs to be started";
             return status;
         }
 
         public string getPctStatus()
         {
             string status = sendCommand(":SUPer:STATus? PCT", requestResponse: true);
-            hasPctRunning = status.Trim() == "1";
             return status;
+        }
+
+        public bool hasPctRunning()
+        {
+            return getPctStatus().Trim().Equals("1");
         }
 
         /// <summary>
@@ -98,7 +86,6 @@ namespace MAP200
                 Thread.Sleep(500);
                 if (sw.ElapsedMilliseconds > 5000) throw new TimeoutException();
             }
-            pct.closeConnection();
         }
     }
 }

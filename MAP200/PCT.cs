@@ -19,7 +19,9 @@ namespace MAP200
         private IMAP200_PCTDevicePath IPath;
         private IMAP200_PCTSystem ISystem;
 
-        public string pctResourceName { get; set; } = "TCPIP0::135.84.72.169::INST1::INSTR";
+        public MAP200_Results results { get; set; }
+
+        public string pctResourceName { get; set; } = "TCPIP0::135.84.72.169::8301::SOCKET";
         public string status { get; set; }
 
         public bool isConnected { get; set; }
@@ -37,20 +39,22 @@ namespace MAP200
 
         public string Initialize()
         {
-            try
+            if (!pctConnection.Initialized)
             {
-                if (!pctConnection.Initialized)
+                try
                 {
+
                     pctConnection.Initialize(pctResourceName, false, false, "Simulate = false");
+                    isConnected = true;
+                    return "PCT Connected";
                 }
-               isConnected = true;
-               return "PCT Connected";
+                catch (Exception ex)
+                {
+                    isConnected = false;
+                    return ex.Message;
+                }
             }
-            catch (Exception ex)
-            {
-                isConnected = false;
-                return ex.Message;
-            }
+            return ("PCT Initialized");
         }
 
         private void AssignInterfaces()
@@ -100,11 +104,9 @@ namespace MAP200
                 }
 
                 double insertionLoss = IMeas.GetIL();
-                //double returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, 0.82, 0.82);
-                //double returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, 0, 0);
                 double returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, 0.82, 0.82);
-
                 double length = IMeas.GetLength();
+
 
                 results.Add(string.Format("Insertion Loss: {0}", insertionLoss.ToString()));
                 results.Add(string.Format("Return Loss: {0} ", returnLoss.ToString()));
@@ -119,6 +121,50 @@ namespace MAP200
             var jsonResults = JsonConvert.SerializeObject(results);
             return results;
         }
+
+        public string runTestAndReturnAsJson()
+        {
+            MAP200_Results results = new MAP200_Results();
+
+            if (pctConnection.Initialized) { }
+            else { Initialize(); }
+
+            AssignInterfaces();
+
+            if (isReadyToTest)
+            {
+                ISetup.Type = MAP200_PCTMeasurementTypeEnum.MAP200_PCTMeasurementTypeDUT;
+                IMeas.Initiate();
+
+                do
+                {
+                    Thread.Sleep(100);
+                } while (IMeas.State == MAP200_PCTMeasurementStateEnum.MAP200_PCTMeasurementState_Busy);
+
+                string msg = ISystem.GetWarning();
+                if (!msg.Equals("No Warning"))
+                {
+                    Console.WriteLine(msg);
+                }
+
+                double insertionLoss = IMeas.GetIL();
+                double returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, 0.82, 0.82);
+                double length = IMeas.GetLength();
+
+                results.insertionLoss = insertionLoss.ToString();
+                results.returnLoss = returnLoss.ToString();
+                results.length = length.ToString();
+
+                pctConnection.Close();
+            }
+            else
+            {
+                return "PCT not ready for test";
+            }
+            var jsonResults = JsonConvert.SerializeObject(results);
+            return jsonResults;
+        }
+
 
         public void closeConnection()
         {

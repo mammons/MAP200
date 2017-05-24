@@ -29,7 +29,8 @@ namespace MAP200
 
         protected void startPctBtn_Click(object sender, EventArgs e)
         {
-            if (map200.hasPctRunning)
+            bool pctRunningOnMap200 = map200.hasPctRunning();
+            if (!pctRunningOnMap200)
             {
                 try
                 {
@@ -41,12 +42,16 @@ namespace MAP200
                     writeToLog("Timeout starting the PCT");
                 }
             }
-            writeToLog("PCT already running");
+            else
+            {
+                writeToLog("PCT already running");
+            }
         }
 
         protected void stopPctBtn_Click(object sender, EventArgs e)
         {
-            if (map200.hasPctRunning)
+            bool pctRunningOnMap200 = map200.hasPctRunning();
+            if (pctRunningOnMap200)
             {
                 try
                 {
@@ -58,14 +63,19 @@ namespace MAP200
                     writeToLog("Timeout stopping the PCT");
                 }
             }
-            writeToLog("PCT already stopped");
+            else
+            {
+                writeToLog("PCT already stopped");
+            }
         }
 
         protected void runBtn_Click(object sender, EventArgs e)
         {
             List<string> testResults = new List<string>();
+            //string testResults;
             testResults = (List<string>)map200.pct.runTest();
-            populateFieldsWithResults(testResults);
+            //testResults = map200.pct.runTest();
+            populateLogWithResults(testResults);
         }
 
 
@@ -74,9 +84,12 @@ namespace MAP200
             writeToLog(map200.verbosePctStatus);
         }
 
-        private void populateFieldsWithResults(IEnumerable<string> results)
+        private void populateLogWithResults(IEnumerable<string> results)
         {
-
+            foreach(var result in results)
+            {
+                writeToLog(result);
+            }
         }
 
         private void writeToLog(string str)

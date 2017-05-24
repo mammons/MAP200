@@ -10,5 +10,6 @@ namespace MAP200
         public string insertionLoss { get; set; }
         public string returnLoss { get; set; }
         public string length { get; set; }
+        public TestSetMessage message { get; set; }
     }
 }
