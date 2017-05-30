@@ -11,22 +11,23 @@ namespace MAP200
     public partial class Default : System.Web.UI.Page
     {
         public MAP200 map200 { get; set; }
-        public PCT pct { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             map200 = new MAP200();
-            pct = new PCT();
+            map200.conman.MAP200ConnectionFailed += OnMAP200ConnectionFailed;
         }
 
+        //This button returns the information from the MAP200 CMR or chassis. If anything is returned then we were able to make a connection
         protected void statusBtn_Click(object sender, EventArgs e)
         {
             string status;
 
             status = map200.sendCommand("IDN?", requestResponse: true);
-            logTextBox.Text = status;
+            writeToLog(status);
         }
-
+        
+        //This button sends the command to start the PCT on the MAP200 which is required to run a test
         protected void startPctBtn_Click(object sender, EventArgs e)
         {
             bool pctRunningOnMap200 = map200.hasPctRunning();
@@ -48,6 +49,7 @@ namespace MAP200
             }
         }
 
+        //This button stops the PCT
         protected void stopPctBtn_Click(object sender, EventArgs e)
         {
             bool pctRunningOnMap200 = map200.hasPctRunning();
@@ -69,21 +71,23 @@ namespace MAP200
             }
         }
 
+        //This button runs the test on the PCT which should return the insertion loss, return loss, and length of the jumper
         protected void runBtn_Click(object sender, EventArgs e)
         {
-            List<string> testResults = new List<string>();
-            //string testResults;
-            testResults = (List<string>)map200.pct.runTest();
-            //testResults = map200.pct.runTest();
-            populateLogWithResults(testResults);
+            map200.pct.runTestAndReturnAsJson();
+            populateFieldsWithResults(map200.pct.results);
         }
 
-
+        //This button gets the status of the PCT running on the MAP200
         protected void pctStatusBtn_Click(object sender, EventArgs e)
         {
             writeToLog(map200.verbosePctStatus);
         }
 
+        /// <summary>
+        /// Sends the results to the big log box
+        /// </summary>
+        /// <param name="results"></param>
         private void populateLogWithResults(IEnumerable<string> results)
         {
             foreach(var result in results)
@@ -92,9 +96,43 @@ namespace MAP200
             }
         }
 
+        /// <summary>
+        /// Fills in the actual fields of the form with the results
+        /// </summary>
+        /// <param name="results"></param>
+        private void populateFieldsWithResults(MAP200_Results results)
+        {
+            insertionLossTextBox.Text = results.insertionLoss;
+            returnLossTextBox.Text = results.returnLoss;
+            lengthTextBox.Text = results.length;
+            Console.WriteLine("JSON RESULTS?");
+            writeToLog(results.jsonResults);
+        }
+
+        /// <summary>
+        /// Adds text to the log box
+        /// </summary>
+        /// <param name="str"></param>
         private void writeToLog(string str)
         {
             logTextBox.Text += str + Environment.NewLine;
+        }
+
+        /// <summary>
+        /// Clears the form text boxes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void clearBtn_Click(object sender, EventArgs e)
+        {
+            insertionLossTextBox.Text = "";
+            returnLossTextBox.Text = "";
+            lengthTextBox.Text = "";
+        }
+
+        public void OnMAP200ConnectionFailed(object source, MAP200MessageEventArgs args)
+        {
+            writeToLog(args.response);
         }
     }
 }

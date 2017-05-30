@@ -8,20 +8,28 @@ using Ivi.Visa.Interop;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
-
+using NLog;
 namespace MAP200
 {
     public class MAP200
     {
-        public string resourceName { get; set; } = "TCPIP0::135.84.72.169::INST0::INSTR";
+        //Object Variables
+        public MAP200_ConnectionManager conman { get; set; }
+        public PCT pct { get; set; }
+
+        //Class variables
+        public string resourceName { get; set; } = "TCPIP0::135.84.72.165::INST0::INSTR";
         public string setInfo { get; set; }
         public string verbosePctStatus {
             get { return getVerbosePctStatus(); }
         }
         public bool isConnected { get; set; }
         public bool isReadyToTest { get; set; }
-        public MAP200_ConnectionManager conman { get; set; }
-        public PCT pct { get; set; }
+
+        //NLog Instance
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
+
 
         public MAP200()
         {
@@ -39,22 +47,31 @@ namespace MAP200
             string status;
 
             status = hasPctRunning() ? "PCT Ready" : "PCT needs to be started";
+            logger.Debug("Verbose PCT Status: {0}", status);
+
             return status;
         }
 
         public string getPctStatus()
         {
+            logger.Debug("Getting PCT Status...");
             string status = sendCommand(":SUPer:STATus? PCT", requestResponse: true);
+            logger.Debug("PCT Status: {0}", status.Trim());
+
             return status;
         }
 
+        /// <summary>
+        /// Sends the command to get the PCT status and returns whether it's running or not
+        /// </summary>
+        /// <returns>True if PCT is running. Otherwise false</returns>
         public bool hasPctRunning()
         {
             return getPctStatus().Trim().Equals("1");
         }
 
         /// <summary>
-        /// The Launch command does not return a response from the MAP200.
+        /// The Launch command does not return a response from the MAP200. This should start the PCT
         /// </summary>
         public void startPct()
         {
