@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using Ivi.Visa.Interop;
 using System.Threading.Tasks;
 using NLog;
@@ -50,17 +47,17 @@ namespace MAP200
         public void openConnectionToCmr()
         {
             logger.Debug("Opening connection to CMR...");
-            //Instantiates a new object if ioObject is null
+            //Instantiates a new object if ioObject is null otherwise uses the existing object
             ioObject = ioObject ?? new FormattedIO488();
 
             //Instantiates a new object if resourceManager is null
             resourceManager =  resourceManager ?? new ResourceManager();
 
-            //Try to open a connection to the test set and if successful, return the IDN
+            //Try to open a connection to the test set
             try
             {
                 //Open a new connection to the MAP200 CMR
-                ioObject.IO = (IMessage)resourceManager.Open(resourceName, AccessMode.NO_LOCK, 5000, "");
+                ioObject.IO = (IMessage)resourceManager.Open(ResourceName: resourceName, mode: AccessMode.NO_LOCK, openTimeout: 5000, OptionString: "");
                 ioObject.IO.TerminationCharacterEnabled = true;
                 cmrIsConnected = true;
                 logger.Debug("Connection open");
@@ -78,8 +75,7 @@ namespace MAP200
         {
             openConnectionToCmr();
             if (cmrIsConnected)
-            {
-                
+            {                
                 try
                 {
                     ioObject.WriteString(command + "\n", true);

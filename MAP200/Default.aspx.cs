@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using NLog;
 
 
 namespace MAP200
@@ -12,9 +13,13 @@ namespace MAP200
     {
         public MAP200 map200 { get; set; }
 
+        Logger logger = LogManager.GetCurrentClassLogger();
+
         protected void Page_Load(object sender, EventArgs e)
         {
             map200 = new MAP200();
+
+            //Event fired if the connection to the MAP200 fails
             map200.conman.MAP200ConnectionFailed += OnMAP200ConnectionFailed;
         }
 
@@ -74,8 +79,14 @@ namespace MAP200
         //This button runs the test on the PCT which should return the insertion loss, return loss, and length of the jumper
         protected void runBtn_Click(object sender, EventArgs e)
         {
-            map200.pct.runTestAndReturnAsJson();
-            populateFieldsWithResults(map200.pct.results);
+            if (map200.hasPctRunning())
+            {
+                map200.pct.runTestAndReturnAsJson();
+                populateFieldsWithResults(map200.pct.results);
+            }else
+            {
+                writeToLog("PCT needs to be started before you can run a test");
+            }
         }
 
         //This button gets the status of the PCT running on the MAP200
@@ -105,7 +116,6 @@ namespace MAP200
             insertionLossTextBox.Text = results.insertionLoss;
             returnLossTextBox.Text = results.returnLoss;
             lengthTextBox.Text = results.length;
-            Console.WriteLine("JSON RESULTS?");
             writeToLog(results.jsonResults);
         }
 
@@ -116,6 +126,7 @@ namespace MAP200
         private void writeToLog(string str)
         {
             logTextBox.Text += str + Environment.NewLine;
+            logger.Info(str);
         }
 
         /// <summary>

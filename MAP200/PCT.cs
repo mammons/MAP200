@@ -58,7 +58,6 @@ namespace MAP200
             {
                 try
                 {
-
                     pctConnection.Initialize(pctResourceName, false, false, "Simulate = false");
                     isConnected = true;
                     return "PCT Connected";
@@ -166,11 +165,11 @@ namespace MAP200
                     string msg = ISystem.GetWarning();
                     if (!msg.Equals("No Warning"))
                     {
-                        Console.WriteLine(msg);
+                        logger.Debug(msg);
                     }
 
                     results.insertionLoss = IMeas.GetIL().ToString();
-                    results.returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, 0.82, 0.82).ToString();
+                    results.returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, -0.82, 0.82).ToString();
                     results.length = IMeas.GetLength().ToString();
                 }
                 catch (Exception ex)
@@ -186,6 +185,7 @@ namespace MAP200
             {
                 results.message.Response.Message = "PCT not ready to test";
             }
+            //Converts the results to JSON and puts that in results.message
             results.buildJson();
             return results.message;
         }

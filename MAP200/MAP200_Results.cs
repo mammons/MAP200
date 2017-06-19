@@ -25,11 +25,19 @@ namespace MAP200
             message.Header.TestSetModel = "MAP200";
             message.Header.TestSetName = "MAP200";
             message.Header.OperId = "MRA";
-            message.Header.Command1 = "UP";
+            message.Header.Command1 = "RE";
             message.Header.Command2 = "FI";
-            message.Body["insertionLoss"] = insertionLoss.ToString();
-            message.Body["returnLoss"] = returnLoss.ToString();
-            message.Body["length"] = length.ToString();
+            //TODO verify these properties aren't null before trying to assign them
+            message.Body["serialNumber"] = "222888777001";
+            //message.Body["insertionLoss"] = insertionLoss.ToString();
+            //message.Body["returnLoss"] = returnLoss.ToString();
+            //message.Body["length"] = length.ToString();
+
+            //-------DUMMY DATA--------------//
+            message.Body["insertionLoss"] = ".15";
+            message.Body["returnLoss"] = "60";
+            message.Body["length"] = "9";
+            //-------------------------------//
 
             jsonResults = JsonConvert.SerializeObject(message);
         }

@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Ivi.Driver.Interop;
-using JDSU.CMR.Interop;
-using Ivi.Visa.Interop;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using NLog;
+
 namespace MAP200
 {
     public class MAP200
@@ -71,7 +65,8 @@ namespace MAP200
         }
 
         /// <summary>
-        /// The Launch command does not return a response from the MAP200. This should start the PCT
+        /// The Launch command does not return a response from the MAP200 so we have to check the status until we get a 1 indicating it's running.
+        /// If we don't get a 1 within 5 seconds, we throw a timeout exception
         /// </summary>
         public void startPct()
         {
@@ -91,6 +86,10 @@ namespace MAP200
             pct = new PCT();
         }
 
+        /// <summary>
+        /// The exit command does not return a response from the MAP200 so we have to check the status until we get a 0 indicating it's stopped.
+        /// If we don't get a 0 within 5 seconds, we throw a timeout exception
+        /// </summary>
         public void stopPct()
         {
             sendCommand("SUPer:EXIT PCT", requestResponse: false);
