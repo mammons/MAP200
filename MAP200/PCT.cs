@@ -11,7 +11,7 @@ namespace MAP200
 {
     /// <summary>
     /// The PCT class manages the PCT with IVI drivers. The PCT is an application running on the MAP200 which actually runs the test
-    /// to return the needed values.
+    /// to return the insertion loss, return loss, and length
     /// </summary>
     public class PCT
     {
@@ -28,8 +28,9 @@ namespace MAP200
         private IMAP200_PCTSystem ISystem;
 
         public MAP200_Results results { get; set; }
+        public Jumper jumper { get; set; }
 
-        public string pctResourceName { get; set; } = "TCPIP0::135.84.72.165::8301::SOCKET";
+        public string pctResourceName { get; set; } = "TCPIP0::135.84.72.170::8301::SOCKET";
         public string status { get; set; }
 
         public bool isConnected { get; set; }
@@ -45,6 +46,11 @@ namespace MAP200
         {
             pctConnection = new MAP200_PCT();
             results = new MAP200_Results();
+        }
+
+        public PCT(Jumper jumper)
+        {
+            this.jumper = jumper;
         }
 
 
@@ -143,51 +149,59 @@ namespace MAP200
             return results;
         }
 
-        public TestSetMessage runTestAndReturnAsJson()
+        public bool runTest(Jumper jumper)
         {
-            if (pctConnection.Initialized) { }
-            else { Initialize(); }
 
-            AssignInterfaces();
+            jumper.results.InsertionLoss1550SCA = 0.15;
+            jumper.results.ReturnLoss1550SCA = 60;
+            jumper.results.LengthInMeters = 9;
+            return true;
 
-            if (isReadyToTest)
-            {
-                try
-                {
-                    ISetup.Type = MAP200_PCTMeasurementTypeEnum.MAP200_PCTMeasurementTypeDUT;
-                    IMeas.Initiate();
+            //this.jumper = this.jumper ?? jumper;
 
-                    do
-                    {
-                        Thread.Sleep(100);
-                    } while (IMeas.State == MAP200_PCTMeasurementStateEnum.MAP200_PCTMeasurementState_Busy);
+            //if (pctConnection.Initialized) { }
+            //else { Initialize(); }
 
-                    string msg = ISystem.GetWarning();
-                    if (!msg.Equals("No Warning"))
-                    {
-                        logger.Debug(msg);
-                    }
+            //AssignInterfaces();
 
-                    results.insertionLoss = IMeas.GetIL().ToString();
-                    results.returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, -0.82, 0.82).ToString();
-                    results.length = IMeas.GetLength().ToString();
-                }
-                catch (Exception ex)
-                {
-                    results.message.Response.Message = ex.Message;
-                }
-                finally
-                {
-                    pctConnection.Close();
-                }
-            }
-            else
-            {
-                results.message.Response.Message = "PCT not ready to test";
-            }
-            //Converts the results to JSON and puts that in results.message
-            results.buildJson();
-            return results.message;
+            //if (isReadyToTest)
+            //{
+            //    try
+            //    {
+            //        ISetup.Type = MAP200_PCTMeasurementTypeEnum.MAP200_PCTMeasurementTypeDUT;
+            //        IMeas.Initiate();
+
+            //        do
+            //        {
+            //            Thread.Sleep(100);
+            //        } while (IMeas.State == MAP200_PCTMeasurementStateEnum.MAP200_PCTMeasurementState_Busy);
+
+            //        string msg = ISystem.GetWarning();
+            //        if (!msg.Equals("No Warning"))
+            //        {
+            //            logger.Debug(msg);
+            //        }
+
+            //        jumper.results.InsertionLoss1550SCA = IMeas.GetIL();
+            //        jumper.results.ReturnLoss1550SCA = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, -0.82, 0.82);
+            //        jumper.results.LengthInMeters = IMeas.GetLength();
+            //        return true;
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        jumper.postMessage.Response.Message = ex.Message;
+            //        return false;
+            //    }
+            //    finally
+            //    {
+            //        pctConnection.Close();
+            //    }
+            //}
+            //else
+            //{
+            //    jumper.postMessage.Response.Message = "PCT not ready to test";
+            //    return false;
+            //}
         }
 
 

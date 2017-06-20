@@ -12,7 +12,7 @@ namespace MAP200
         public ResourceManager resourceManager { get; set; }
 
         //Class variables
-        public string resourceName { get; set; } = "TCPIP0::135.84.72.165::INST0::INSTR";
+        public string resourceName { get; set; } = "TCPIP0::135.84.72.170::INST0::INSTR";
         public bool cmrIsConnected { get; set; } = false;
         public bool pctIsConnected { get; set; } = false;
         public string response { get; set; } = "";

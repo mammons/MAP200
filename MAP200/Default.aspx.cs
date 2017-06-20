@@ -12,12 +12,14 @@ namespace MAP200
     public partial class Default : System.Web.UI.Page
     {
         public MAP200 map200 { get; set; }
+        public Jumper jumper { get; set; }
 
         Logger logger = LogManager.GetCurrentClassLogger();
 
         protected void Page_Load(object sender, EventArgs e)
         {
             map200 = new MAP200();
+            jumper = new Jumper();
 
             //Event fired if the connection to the MAP200 fails
             map200.conman.MAP200ConnectionFailed += OnMAP200ConnectionFailed;
@@ -81,12 +83,21 @@ namespace MAP200
         {
             if (map200.hasPctRunning())
             {
-                map200.pct.runTestAndReturnAsJson();
-                populateFieldsWithResults(map200.pct.results);
+                //PTStransaction pts = new PTStransaction();
+                //pts.CheckLossNeeded(jumper, map200);
+                map200.pct.runTest(jumper);
+                populateFieldsWithResults(jumper.results);
+                SendResultsToPTS();
             }else
             {
                 writeToLog("PCT needs to be started before you can run a test");
             }
+        }
+
+        private void SendResultsToPTS()
+        {
+            PTStransaction pts = new PTStransaction();
+            pts.SendResult(jumper, map200);
         }
 
         //This button gets the status of the PCT running on the MAP200
@@ -113,10 +124,10 @@ namespace MAP200
         /// <param name="results"></param>
         private void populateFieldsWithResults(MAP200_Results results)
         {
-            insertionLossTextBox.Text = results.insertionLoss;
-            returnLossTextBox.Text = results.returnLoss;
-            lengthTextBox.Text = results.length;
-            writeToLog(results.jsonResults);
+            insertionLossTextBox.Text = jumper.results.InsertionLoss1550SCA.ToString();
+            returnLossTextBox.Text = jumper.results.ReturnLoss1550SCA.ToString();
+            lengthTextBox.Text = jumper.results.LengthInMeters.ToString();
+            writeToLog(jumper.jsonResults);
         }
 
         /// <summary>

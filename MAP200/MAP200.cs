@@ -12,11 +12,15 @@ namespace MAP200
         public PCT pct { get; set; }
 
         //Class variables
-        public string resourceName { get; set; } = "TCPIP0::135.84.72.165::INST0::INSTR";
         public string setInfo { get; set; }
         public string verbosePctStatus {
             get { return getVerbosePctStatus(); }
         }
+        public string Workstation { get; set; }
+        public string Location { get; set; } = "CAR";
+        public string Model { get; set; } = "MAP200";
+        public string SerialNumber { get; set; } = "20204";
+        public string OperId { get; set; } = "MRA";
         public bool isConnected { get; set; }
         public bool isReadyToTest { get; set; }
 

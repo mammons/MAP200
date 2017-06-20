@@ -15,7 +15,7 @@
     <form runat="server">
         <div class="container">
             <div class="row">
-                <asp:Label Text="Version 0.3" runat="server" />
+                <asp:Label Text="Version 0.4" runat="server" />
                 <div class="form-group">
                     <div class="values">
                         <div class="value value--insertion-loss control-label col-md-4">
