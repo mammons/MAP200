@@ -16,12 +16,11 @@ namespace MAP200
         public string verbosePctStatus {
             get { return getVerbosePctStatus(); }
         }
-        public string Workstation { get; set; }
         public string Location { get; set; } = "CAR";
-        public string Model { get; set; } = "MAP200";
-        public string SerialNumber { get; set; } = "20204";
+        public string Model { get; set; } 
+        public string SerialNumber { get; set; }
         public string OperId { get; set; } = "MRA";
-        public bool isConnected { get; set; }
+        private bool isConnected { get; set; }
         public bool isReadyToTest { get; set; }
 
         //NLog Instance
@@ -33,6 +32,20 @@ namespace MAP200
         {
             conman = new MAP200_ConnectionManager();
             pct = new PCT();
+            GetSerialNumber();
+        }
+
+        public void GetSerialNumber()
+        {
+            setInfo = sendCommand("IDN?", requestResponse: true);
+            Model = setInfo.Split(',')[1];
+            SerialNumber = setInfo.Split(',')[2];
+        }
+
+        public bool IsConnected()
+        {
+            isConnected = !string.IsNullOrWhiteSpace(sendCommand("IDN?", requestResponse: true));
+            return isConnected;
         }
 
         public string sendCommand(string command, bool requestResponse)

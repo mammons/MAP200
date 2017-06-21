@@ -28,10 +28,13 @@ namespace MAP200
         //This button returns the information from the MAP200 CMR or chassis. If anything is returned then we were able to make a connection
         protected void statusBtn_Click(object sender, EventArgs e)
         {
-            string status;
-
-            status = map200.sendCommand("IDN?", requestResponse: true);
-            writeToLog(status);
+            if (map200.IsConnected())
+            {
+                writeToLog("MAP200 Connected");
+            }else
+            {
+                writeToLog("MAP200 Not Connected");
+            }
         }
         
         //This button sends the command to start the PCT on the MAP200 which is required to run a test
@@ -81,23 +84,37 @@ namespace MAP200
         //This button runs the test on the PCT which should return the insertion loss, return loss, and length of the jumper
         protected void runBtn_Click(object sender, EventArgs e)
         {
-            if (map200.hasPctRunning())
+            if (CheckIfTestingRequired())
             {
-                //PTStransaction pts = new PTStransaction();
-                //pts.CheckLossNeeded(jumper, map200);
-                map200.pct.runTest(jumper);
-                populateFieldsWithResults(jumper.results);
-                SendResultsToPTS();
-            }else
-            {
-                writeToLog("PCT needs to be started before you can run a test");
+                if (map200.hasPctRunning())
+                {
+                    map200.pct.runTest(jumper);
+                    PopulateFieldsWithResults(jumper.results);
+                    jumper.finalResponseMessage = SendResultsToPTS(jumper, map200);
+                    writeToLog(jumper.jsonResults);
+                }
+                else
+                {
+                    writeToLog("PCT needs to be started before you can run a test");
+                }
             }
+            else
+            {
+                writeToLog(string.Format("Testing not required for jumper with serial number: {0}", jumper.serialNumber));
+            }
+
+            
         }
 
-        private void SendResultsToPTS()
+        private TestSetMessage SendResultsToPTS(Jumper jumper, MAP200 testSet)
         {
             PTStransaction pts = new PTStransaction();
-            pts.SendResult(jumper, map200);
+            return pts.SendUPFI(jumper, testSet);
+        }
+
+        private bool CheckIfTestingRequired()
+        {
+            return jumper.GetTestingRequired(map200);
         }
 
         //This button gets the status of the PCT running on the MAP200
@@ -122,12 +139,11 @@ namespace MAP200
         /// Fills in the actual fields of the form with the results
         /// </summary>
         /// <param name="results"></param>
-        private void populateFieldsWithResults(MAP200_Results results)
+        private void PopulateFieldsWithResults(MAP200_Results results)
         {
             insertionLossTextBox.Text = jumper.results.InsertionLoss1550SCA.ToString();
             returnLossTextBox.Text = jumper.results.ReturnLoss1550SCA.ToString();
             lengthTextBox.Text = jumper.results.LengthInMeters.ToString();
-            writeToLog(jumper.jsonResults);
         }
 
         /// <summary>

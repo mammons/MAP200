@@ -152,56 +152,58 @@ namespace MAP200
         public bool runTest(Jumper jumper)
         {
 
-            jumper.results.InsertionLoss1550SCA = 0.15;
-            jumper.results.ReturnLoss1550SCA = 60;
-            jumper.results.LengthInMeters = 9;
-            return true;
+            ///For testing
+            //jumper.results.InsertionLoss1550SCA = 0.15;
+            //jumper.results.ReturnLoss1550SCA = 70;
+            //jumper.results.LengthInMeters = 9;
+            //return true;
+            ///----------------------
 
-            //this.jumper = this.jumper ?? jumper;
+            this.jumper = this.jumper ?? jumper;
 
-            //if (pctConnection.Initialized) { }
-            //else { Initialize(); }
+            if (pctConnection.Initialized) { }
+            else { Initialize(); }
 
-            //AssignInterfaces();
+            AssignInterfaces();
 
-            //if (isReadyToTest)
-            //{
-            //    try
-            //    {
-            //        ISetup.Type = MAP200_PCTMeasurementTypeEnum.MAP200_PCTMeasurementTypeDUT;
-            //        IMeas.Initiate();
+            if (isReadyToTest)
+            {
+                try
+                {
+                    ISetup.Type = MAP200_PCTMeasurementTypeEnum.MAP200_PCTMeasurementTypeDUT;
+                    IMeas.Initiate();
 
-            //        do
-            //        {
-            //            Thread.Sleep(100);
-            //        } while (IMeas.State == MAP200_PCTMeasurementStateEnum.MAP200_PCTMeasurementState_Busy);
+                    do
+                    {
+                        Thread.Sleep(100);
+                    } while (IMeas.State == MAP200_PCTMeasurementStateEnum.MAP200_PCTMeasurementState_Busy);
 
-            //        string msg = ISystem.GetWarning();
-            //        if (!msg.Equals("No Warning"))
-            //        {
-            //            logger.Debug(msg);
-            //        }
+                    string msg = ISystem.GetWarning();
+                    if (!msg.Equals("No Warning"))
+                    {
+                        logger.Debug(msg);
+                    }
 
-            //        jumper.results.InsertionLoss1550SCA = IMeas.GetIL();
-            //        jumper.results.ReturnLoss1550SCA = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, -0.82, 0.82);
-            //        jumper.results.LengthInMeters = IMeas.GetLength();
-            //        return true;
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        jumper.postMessage.Response.Message = ex.Message;
-            //        return false;
-            //    }
-            //    finally
-            //    {
-            //        pctConnection.Close();
-            //    }
-            //}
-            //else
-            //{
-            //    jumper.postMessage.Response.Message = "PCT not ready to test";
-            //    return false;
-            //}
+                    jumper.results.InsertionLoss1550SCA = IMeas.GetIL();
+                    jumper.results.ReturnLoss1550SCA = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, -0.82, 0.82);
+                    jumper.results.LengthInMeters = IMeas.GetLength();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    jumper.postMessage.Response.Message = ex.Message;
+                    return false;
+                }
+                finally
+                {
+                    pctConnection.Close();
+                }
+            }
+            else
+            {
+                jumper.postMessage.Response.Message = "PCT not ready to test";
+                return false;
+            }
         }
 
 
