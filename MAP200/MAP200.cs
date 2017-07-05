@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Diagnostics;
 using NLog;
+using System.Linq;
 
 namespace MAP200
 {
@@ -17,7 +18,8 @@ namespace MAP200
             get { return GetVerbosePctStatus(); }
         }
         public string Location { get; set; } = "CAR";
-        public string Model { get; set; } 
+        public string Model { get; set; }
+        public string Name { get; set; } = "DevMap";
         public string SerialNumber { get; set; }
         public string OperId { get; set; } = "MRA";
         private bool isConnected { get; set; }
@@ -32,30 +34,32 @@ namespace MAP200
         {
             conman = new MAP200_ConnectionManager();
             pct = new PCT();
+            GetSetInfo();
         }
 
-        public bool GetSerialNumber()
+        public bool GetSetInfo()
         {
-            setInfo = SendCommand("IDN?", requestResponse: true);
-            if (setInfo.Contains("failed"))
+            var op = new OperationResult();
+            op = SendCommand("IDN?", requestResponse: true);
+            setInfo = op.Success ? op.Messages[0] : "Could not retrieve set info";
+
+            if (op.Success)
             {
-                return false;
-            }
-            else {
                 Model = setInfo.Split(',')[1];
                 SerialNumber = setInfo.Split(',')[2];
             }
-            return true;
+
+            return op.Success;
         }
 
         public bool IsConnected()
         {
-            string connCheck = SendCommand("IDN?", requestResponse: true);
-            isConnected = !connCheck.Contains("failed");
-            return isConnected;
+            var op = new OperationResult();
+            op = SendCommand("IDN?", requestResponse: true);
+            return op.Messages.Any();
         }
 
-        public string SendCommand(string command, bool requestResponse)
+        public OperationResult SendCommand(string command, bool requestResponse)
         {
            return conman.SendCommandToCmr(command, requestResponse);            
         }
@@ -64,7 +68,7 @@ namespace MAP200
         {
             string status;
 
-            status = hasPctRunning() ? "PCT Ready" : "PCT needs to be started";
+            status = HasPctRunning() ? "PCT Ready" : "PCT needs to be started";
             logger.Debug("Verbose PCT Status: {0}", status);
 
             return status;
@@ -73,7 +77,13 @@ namespace MAP200
         public string GetPctStatus()
         {
             logger.Debug("Getting PCT Status...");
-            string status = SendCommand(":SUPer:STATus? PCT", requestResponse: true);
+
+            var op = new OperationResult();
+
+            op = SendCommand(":SUPer:STATus? PCT", requestResponse: true);
+
+            string status = op.Messages[0];
+
             logger.Debug("PCT Status: {0}", status.Trim());
 
             return status;
@@ -83,7 +93,7 @@ namespace MAP200
         /// Sends the command to get the PCT status and returns whether it's running or not
         /// </summary>
         /// <returns>True if PCT is running. Otherwise false</returns>
-        public bool hasPctRunning()
+        public bool HasPctRunning()
         {
             return GetPctStatus().Trim().Equals("1");
         }

@@ -106,18 +106,18 @@ namespace MAP200
             postMessage.Header.TestSetName = testSet.SerialNumber;
             postMessage.Header.Location = testSet.Location;
             postMessage.Header.OperId = testSet.OperId;
-            postMessage.Body["serialNumber"] = jumper.serialNumber;
-            postMessage.Body["InsertionLoss1550SCA"] = jumper.results.InsertionLoss1550SCA.ToString();
-            postMessage.Body["InsertionLossLimit1550SCA"] = jumper.limits.InsertionLossLimit1550SCA.ToString();
-            postMessage.Body["ReturnLoss1550SCA"] = jumper.results.ReturnLoss1550SCA.ToString();
-            postMessage.Body["ReturnLossLimit1550SCA"] = jumper.limits.ReturnLossLimit1550SCA.ToString();
-            postMessage.Body["InsertionLoss1550UNC"] = jumper.results.InsertionLoss1550UNC.ToString();
-            postMessage.Body["InsertionLossLimit1550UNC"] = jumper.limits.InsertionLossLimit1550UNC.ToString();
-            postMessage.Body["ReturnLoss1550UNC"] = jumper.results.ReturnLoss1550UNC.ToString();
-            postMessage.Body["ReturnLossLimit1550UNC"] = jumper.limits.ReturnLossLimit1550UNC.ToString();
-            postMessage.Body["LengthInMeters"] = jumper.results.LengthInMeters.ToString();
-            postMessage.Body["LengthUpperLimit"] = jumper.limits.LengthUpperLimitInMeters.ToString();
-            postMessage.Body["LengthLowerLimit"] = jumper.limits.LengthLowerLimitInMeters.ToString();
+            postMessage.Body["serialNumber"] = jumper.SerialNumber;
+            postMessage.Body["InsertionLoss1550SCA"] = jumper.Results.InsertionLoss1550SCA.ToString();
+            postMessage.Body["InsertionLossLimit1550SCA"] = jumper.Limits.InsertionLossLimit1550SCA.ToString();
+            postMessage.Body["ReturnLoss1550SCA"] = jumper.Results.ReturnLoss1550SCA.ToString();
+            postMessage.Body["ReturnLossLimit1550SCA"] = jumper.Limits.ReturnLossLimit1550SCA.ToString();
+            postMessage.Body["InsertionLoss1550UNC"] = jumper.Results.InsertionLoss1550UNC.ToString();
+            postMessage.Body["InsertionLossLimit1550UNC"] = jumper.Limits.InsertionLossLimit1550UNC.ToString();
+            postMessage.Body["ReturnLoss1550UNC"] = jumper.Results.ReturnLoss1550UNC.ToString();
+            postMessage.Body["ReturnLossLimit1550UNC"] = jumper.Limits.ReturnLossLimit1550UNC.ToString();
+            postMessage.Body["LengthInMeters"] = jumper.Results.LengthInMeters.ToString();
+            postMessage.Body["LengthUpperLimit"] = jumper.Limits.LengthUpperLimitInMeters.ToString();
+            postMessage.Body["LengthLowerLimit"] = jumper.Limits.LengthLowerLimitInMeters.ToString();
         }
 
         protected virtual void OnPTSMessageSending()

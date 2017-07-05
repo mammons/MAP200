@@ -11,11 +11,5 @@ namespace MAP200
         public string UNCResult { get; set; }
         public string LengthResult { get; set; }
         public string SCAResult { get; set; }
-
-
-        public MAP200_Results()
-        {
-            
-        }
     }
 }

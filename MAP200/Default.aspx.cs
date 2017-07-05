@@ -5,29 +5,29 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using NLog;
-
+using System.Text.RegularExpressions;
 
 namespace MAP200
 {
     public partial class Default : System.Web.UI.Page
     {
-        public MAP200 map200 { get; set; }
-        public Jumper jumper { get; set; }
+        public MAP200 Map200 { get; set; }
+        public Jumper Jumper { get; set; }
 
         Logger logger = LogManager.GetCurrentClassLogger();
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            map200 = new MAP200();
-            jumper = new Jumper();
+            Map200 = new MAP200();
+            Jumper = new Jumper();
 
             //Event fired if the connection to the MAP200 fails
-            map200.conman.MAP200ConnectionFailed += OnMAP200ConnectionFailed;
+            Map200.conman.MAP200ConnectionFailed += OnMAP200ConnectionFailed;
 
-            if (!IsPostBack)
-            {
-                map200.GetSerialNumber();
-            }
+            //if (!IsPostBack)
+            //{
+            //    Map200.GetSetInfo();
+            //}
         }
 
         //This button returns the information from the MAP200 CMR or chassis. If anything is returned then we were able to make a connection
@@ -38,13 +38,13 @@ namespace MAP200
 
         private void CheckMAP200Status()
         {
-            if (map200.IsConnected())
+            if (Map200.IsConnected())
             {
-                writeToLog("MAP200 Connected");
+                WriteToLog("MAP200 Connected");
             }
             else
             {
-                writeToLog("MAP200 Not Connected");
+                WriteToLog("MAP200 Not Connected");
             }
         }
 
@@ -56,22 +56,22 @@ namespace MAP200
 
         private void StartPCT()
         {
-            bool pctRunningOnMap200 = map200.hasPctRunning();
+            bool pctRunningOnMap200 = Map200.HasPctRunning();
             if (!pctRunningOnMap200)
             {
                 try
                 {
-                    map200.StartPct();
-                    writeToLog("PCT Started");
+                    Map200.StartPct();
+                    WriteToLog("PCT Started");
                 }
                 catch (TimeoutException ex)
                 {
-                    writeToLog(ex.Message);
+                    WriteToLog(ex.Message);
                 }
             }
             else
             {
-                writeToLog("PCT already running");
+                WriteToLog("PCT already running");
             }
         }
 
@@ -83,22 +83,22 @@ namespace MAP200
 
         private void StopPCT()
         {
-            bool pctRunningOnMap200 = map200.hasPctRunning();
+            bool pctRunningOnMap200 = Map200.HasPctRunning();
             if (pctRunningOnMap200)
             {
                 try
                 {
-                    map200.StopPct();
-                    writeToLog("PCT Stopped");
+                    Map200.StopPct();
+                    WriteToLog("PCT Stopped");
                 }
                 catch (TimeoutException ex)
                 {
-                    writeToLog(ex.Message);
+                    WriteToLog(ex.Message);
                 }
             }
             else
             {
-                writeToLog("PCT already stopped");
+                WriteToLog("PCT already stopped");
             }
         }
 
@@ -110,44 +110,87 @@ namespace MAP200
 
         private void RunTest()
         {
+            AssignSerialIdToJumper();
+
             if (CheckIfTestingRequired())
             {
-                if (map200.hasPctRunning())
+                if (Map200.HasPctRunning())
                 {
-                    map200.pct.runTest(jumper);
+                    var testOp = new OperationResult();
+                    testOp = Map200.pct.RunTest(Jumper);
 
-                    PopulateFieldsOnPageWithResults(jumper.results);
+                    PopulateFieldsOnPageWithResults(Jumper.Results);
 
-                    jumper.finalResponseMessage = SendResultsToPTS(jumper, map200);
+                    Jumper.FinalResponseMessage = SendResultsToPTS(Jumper, Map200);
 
-                    writeToLog(jumper.jsonResults);
+                    WriteToLog(Jumper.jsonResults);
                 }
                 else
                 {
-                    writeToLog("PCT needs to be started before you can run a test");
+                    WriteToLog("PCT needs to be started before you can run a test");
                 }
             }
             else
             {
-                writeToLog(string.Format("Testing not required for jumper with serial number: {0}", jumper.serialNumber));
+                WriteToLog(string.Format("Testing not required for jumper with serial number: {0}", Jumper.SerialNumber));
             }
         }
 
-        private TestSetMessage SendResultsToPTS(Jumper jumper, MAP200 testSet)
+        private void AssignSerialIdToJumper()
+        {
+            var op = ValidateSerialNumber();
+
+            if (op.Success)
+            {
+                Jumper.SerialNumber = serialNumberTextBox.Text;
+            }
+            else
+            {
+                WriteToLog(op.ErrorMessages);
+            }
+        }
+
+        private OperationResult ValidateSerialNumber()
+        {
+            var enteredSerialNumber = serialNumberTextBox.Text;
+            var op = new OperationResult();
+            op.Success = true;
+
+            if(enteredSerialNumber.Length == 0)
+            {
+                op.Success = false;
+                op.ErrorMessages.Add("Serial ID length cannot be zero");
+                return op;
+            }
+
+            Regex onlyNumbers = new Regex(@"^[0-9]+$");
+            if (onlyNumbers.IsMatch(enteredSerialNumber))
+            {
+                return op;
+            }else
+            {
+                op.Success = false;
+                op.ErrorMessages.Add("Serial number must only contain numbers");
+            }
+
+            return op;
+        }
+
+        private TestSetMessage SendResultsToPTS(Jumper Jumper, MAP200 testSet)
         {
             PTStransaction pts = new PTStransaction();
-            return pts.SendUPFI(jumper, testSet);
+            return pts.SendUPFI(Jumper, testSet);
         }
 
         private bool CheckIfTestingRequired()
         {
-            return jumper.GetTestingRequired(map200);
+            return Jumper.GetTestingRequired(Map200);
         }
 
         //This button gets the status of the PCT running on the MAP200
         protected void pctStatusBtn_Click(object sender, EventArgs e)
         {
-            writeToLog(map200.verbosePctStatus);
+            WriteToLog(Map200.verbosePctStatus);
         }
 
         /// <summary>
@@ -158,7 +201,7 @@ namespace MAP200
         {
             foreach(var result in results)
             {
-                writeToLog(result);
+                WriteToLog(result);
             }
         }
 
@@ -168,19 +211,27 @@ namespace MAP200
         /// <param name="results"></param>
         private void PopulateFieldsOnPageWithResults(MAP200_Results results)
         {
-            insertionLossTextBox.Text = jumper.results.InsertionLoss1550SCA.ToString();
-            returnLossTextBox.Text = jumper.results.ReturnLoss1550SCA.ToString();
-            lengthTextBox.Text = jumper.results.LengthInMeters.ToString();
+            insertionLossTextBox.Text = Jumper.Results.InsertionLoss1550SCA.ToString();
+            returnLossTextBox.Text = Jumper.Results.ReturnLoss1550SCA.ToString();
+            lengthTextBox.Text = Jumper.Results.LengthInMeters.ToString();
         }
 
         /// <summary>
         /// Adds text to the log box
         /// </summary>
         /// <param name="str"></param>
-        private void writeToLog(string str)
+        private void WriteToLog(string str)
         {
             logTextBox.Text += str + Environment.NewLine;
             logger.Info(str);
+        }
+
+        private void WriteToLog(List<string> list)
+        {
+            foreach(var msg in list)
+            {
+                WriteToLog(msg);
+            }
         }
 
         /// <summary>
@@ -197,7 +248,7 @@ namespace MAP200
 
         public void OnMAP200ConnectionFailed(object source, MAP200MessageEventArgs args)
         {
-            writeToLog(args.response);
+            WriteToLog(args.Connection.ErrorMessages);
         }
     }
 }

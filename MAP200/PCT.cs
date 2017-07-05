@@ -28,9 +28,9 @@ namespace MAP200
         private IMAP200_PCTSystem ISystem;
 
         public MAP200_Results results { get; set; }
-        public Jumper jumper { get; set; }
+        public Jumper Jumper { get; set; }
 
-        public string pctResourceName { get; set; } = "TCPIP0::135.84.72.170::8301::SOCKET";
+        public string pctResourceName { get; set; } = "TCPIP0::135.84.72.169::8301::SOCKET";
         public string status { get; set; }
 
         public bool isConnected { get; set; }
@@ -53,9 +53,9 @@ namespace MAP200
             results = new MAP200_Results();
         }
 
-        public PCT(Jumper jumper)
+        public PCT(Jumper Jumper)
         {
-            this.jumper = jumper;
+            this.Jumper = Jumper;
         }
 
 
@@ -63,23 +63,29 @@ namespace MAP200
         /// Initializes a connection with the PCT application via IVI commands
         /// </summary>
         /// <returns></returns>
-        public string Initialize()
+        public OperationResult Initialize()
         {
+            var op = new OperationResult();
             if (!pctConnection.Initialized)
             {
                 try
                 {
-                    pctConnection.Initialize(pctResourceName, false, false, "Simulate = false");
+                    pctConnection.Initialize(pctResourceName, 
+                                                IdQuery: false,
+                                                Reset: false,
+                                                OptionString: "Simulate = false");
                     isConnected = true;
-                    return "PCT Connected";
+                    op.Success = true;
+                    op.Messages.Add("PCT Connected");
                 }
                 catch (Exception ex)
                 {
                     isConnected = false;
-                    return ex.Message;
+                    op.Success = false;
+                    op.ErrorMessages.Add(string.Format("Error in Initialize {0}", ex.Message));
                 }
             }
-            return ("PCT Initialized");
+            return op;
         }
 
         /// <summary>
@@ -107,7 +113,7 @@ namespace MAP200
         }
 
         /// <summary>
-        /// Runs the insertion loss/return loss test on the MAP200 with the connected jumper
+        /// Runs the insertion loss/return loss test on the MAP200 with the connected Jumper
         /// </summary>
         /// <returns>A list that contains the values for insertion loss, return loss, and length</returns>
         public IEnumerable<string> runTest()
@@ -154,17 +160,18 @@ namespace MAP200
             return results;
         }
 
-        public bool runTest(Jumper jumper)
+        public OperationResult RunTest(Jumper Jumper)
         {
+            var testOp = new OperationResult();
 
             ///For testing
-            //jumper.results.InsertionLoss1550SCA = 0.15;
-            //jumper.results.ReturnLoss1550SCA = 70;
-            //jumper.results.LengthInMeters = 9;
+            //Jumper.results.InsertionLoss1550SCA = 0.15;
+            //Jumper.results.ReturnLoss1550SCA = 70;
+            //Jumper.results.LengthInMeters = 9;
             //return true;
             ///----------------------
 
-            this.jumper = this.jumper ?? jumper;
+            this.Jumper = this.Jumper ?? Jumper;
 
             if (pctConnection.Initialized) { }
             else { Initialize(); }
@@ -189,26 +196,30 @@ namespace MAP200
                         logger.Debug(msg);
                     }
 
-                    jumper.results.InsertionLoss1550SCA = IMeas.GetIL();
-                    jumper.results.ReturnLoss1550SCA = IMeas.GetORL(Method: ReturnLossMethod, Origin: ReturnLossOrigin, Aoffset: Aoffset, Boffset: Boffset);
-                    jumper.results.LengthInMeters = IMeas.GetLength();
-                    return true;
+                    Jumper.Results.InsertionLoss1550SCA = IMeas.GetIL();
+                    Jumper.Results.ReturnLoss1550SCA = IMeas.GetORL(Method: ReturnLossMethod, Origin: ReturnLossOrigin, Aoffset: Aoffset, Boffset: Boffset);
+                    Jumper.Results.LengthInMeters = IMeas.GetLength();
+                    testOp.Success = true;
                 }
                 catch (Exception ex)
                 {
-                    jumper.postMessage.Response.Message = ex.Message;
-                    return false;
+                    //jumper.postMessage.Response.Message = ex.Message;
+                    testOp.Success = false;
+                    testOp.ErrorMessages.Add(ex.Message);
                 }
                 finally
                 {
-                    pctConnection.Close();
+                    closeConnection();
                 }
             }
             else
             {
-                jumper.postMessage.Response.Message = "PCT not ready to test";
-                return false;
+                //Jumper.postMessage.Response.Message = "PCT not ready to test";
+                testOp.ErrorMessages.Add("PCT not ready to test");
+                testOp.Success = false;
             }
+
+            return testOp;
         }
 
 

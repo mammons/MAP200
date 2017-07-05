@@ -2,6 +2,7 @@
 using Ivi.Visa.Interop;
 using System.Threading.Tasks;
 using NLog;
+using System.Linq;
 
 namespace MAP200
 {
@@ -12,16 +13,15 @@ namespace MAP200
         public ResourceManager resourceManager { get; set; }
 
         //Class variables
-        public string resourceName { get; set; } = "TCPIP0::135.84.72.170::INST0::INSTR";
-        public bool cmrIsConnected { get; set; } = false;
-        public bool pctIsConnected { get; set; } = false;
+        public string resourceName { get; set; } = "TCPIP0::135.84.72.169::INST0::INSTR";
+
         public string response { get; set; } = "";
 
         //Log
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         //Events
-        public delegate void MAP200MessageSendingEventHandler(object sender, EventArgs e);
+        public delegate void MAP200MessageSendingEventHandler(object sender, MAP200MessageEventArgs e);
         public event MAP200MessageSendingEventHandler MAP200MessageSending;
 
         public delegate void MAP200MessageReceivedEventHandler(object sender, MAP200MessageEventArgs e);
@@ -44,7 +44,7 @@ namespace MAP200
             resourceName = instrumentAddress;
         }
 
-        public void OpenConnectionToCmr()
+        public TestSetConnection OpenConnectionToCmr()
         {
             logger.Debug("Opening connection to CMR...");
 
@@ -54,51 +54,57 @@ namespace MAP200
             //Instantiates a new object if resourceManager is null
             resourceManager =  resourceManager ?? new ResourceManager();
 
+            var connection = new TestSetConnection();
+
             //Try to open a connection to the test set
             try
             {
                 //Open a new connection to the MAP200 CMR
                 ioObject.IO = (IMessage)resourceManager.Open(ResourceName: resourceName, mode: AccessMode.NO_LOCK, openTimeout: 5000, OptionString: "");
                 ioObject.IO.TerminationCharacterEnabled = true;
-                cmrIsConnected = true;
+                connection.Connected = true;
                 logger.Debug("Connection open");
             }
             catch (Exception ex)
             {
-                cmrIsConnected = false;
+                connection.Connected = false;
                 logger.Debug("Connect failed: {0}", ex.Message);
-                response = "Connection to MAP200 failed. Check that the device is correctly configured.";
-                OnMAP200ConnectionFailed();
+                connection.ErrorMessages.Add("Connection to MAP200 failed. Check that the device is correctly configured.");
+                OnMAP200ConnectionFailed(connection);
             }
+
+            return connection;
         }
 
-        public string SendCommandToCmr(string command, bool requestResponse)
+        public OperationResult SendCommandToCmr(string command, bool requestResponse)
         {
-            OpenConnectionToCmr();
+            var connection = OpenConnectionToCmr();
 
-            if (cmrIsConnected)
+            var response = new OperationResult();
+
+            if (connection.Connected)
             {                
                 try
                 {
-                    ioObject.WriteString(command + "\n", true);
+                    ioObject.WriteString(command + "\n",flushAndEND: true);
 
                     if (requestResponse)
                     {
-                        //ReadString parameter corresponds to timeout
-                        response = ioObject.IO.ReadString(5000);
+                        response.Messages.Add(ioObject.IO.ReadString(count: 5000));
                     }
                     else
                     {
-                        response = "Command sent";
+                        response.Messages.Add("Command sent");                        
                     }
                 }
                 catch (Exception ex)
                 {
-                    response = "An error occurred: " + ex.Message;
-                    logger.Debug(response);
+                    response.ErrorMessages.Add("An error occurred: " + ex.Message);
+                    logger.Debug(response.ErrorMessages);
                 }
                 finally
                 {
+                    response.Success = (response.Messages != null && response.Messages.Any());
                     try
                     {
                         //seems like close takes a while and doesn't return anything anyway so this should put it on another
@@ -108,20 +114,23 @@ namespace MAP200
                     catch { }
                 }
             }
-            //if response is null then the command failed, otherwise we want to return whatever response we got or assigned
-            response = response ?? "Failed to send command";
             logger.Debug(response);
             return response;
         }
 
-        protected virtual void OnMAP200MessageReceived()
+        protected virtual void OnMAP200MessageReceived(OperationResult op)
         {
-            MAP200MessageReceived?.Invoke(this, new MAP200MessageEventArgs(response));
+            MAP200MessageReceived?.Invoke(this, new MAP200MessageEventArgs(op));
         }
 
-        protected virtual void OnMAP200ConnectionFailed()
+        protected virtual void OnMAP200ConnectionFailed(TestSetConnection connection)
         {
-            MAP200ConnectionFailed?.Invoke(this, new MAP200MessageEventArgs(response));
+            MAP200ConnectionFailed?.Invoke(this, new MAP200MessageEventArgs(connection));
+        }
+
+        protected virtual void OnMAP200MessageSending(OperationResult op)
+        {
+            MAP200MessageSending?.Invoke(this, new MAP200MessageEventArgs(op));
         }
     }
 }

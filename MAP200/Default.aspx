@@ -15,11 +15,11 @@
     <form runat="server">
         <div class="container">
             <div class="row">
-                <asp:Label Text="Version 0.4" runat="server" />
+                <asp:Label Text="Version 0.4 Refactor Beta" runat="server" />
                 <div class="form-group">
                     <div class="value value--serial-number control-label col-md-3">
                         <asp:Label Text="Serial Number" runat="server" AssociatedControlID="serialNumberTextBox" />
-                        <asp:TextBox ID="serialNumberTextBox" runat="server" CssClass="form-control" placeholder="Enter Serial Number"></asp:TextBox>
+                        <asp:TextBox ID="serialNumberTextBox" runat="server" CssClass="form-control" placeholder="Enter Serial Number" Text="222888777001"></asp:TextBox>
                     </div>
                     <div class="values">
                         <div class="value value--insertion-loss control-label col-md-3">

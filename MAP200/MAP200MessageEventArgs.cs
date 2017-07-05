@@ -7,16 +7,27 @@ namespace MAP200
 {
     public class MAP200MessageEventArgs
     {
-        private string _response;
+        private OperationResult _response;
+        private TestSetConnection _connection;
 
-        public MAP200MessageEventArgs(string response)
+        public MAP200MessageEventArgs(OperationResult response)
         {
             _response = response;
         }
 
-        public string response
+        public OperationResult response
         {
             get { return _response; }
+        }
+
+        public MAP200MessageEventArgs(TestSetConnection connection)
+        {
+            _connection = connection;
+        }
+
+        public TestSetConnection Connection
+        {
+            get { return _connection; }
         }
     }
 }
