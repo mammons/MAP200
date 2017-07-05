@@ -13,6 +13,15 @@ namespace MAP200 {
     public partial class Default {
         
         /// <summary>
+        /// serialNumberTextBox control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox serialNumberTextBox;
+        
+        /// <summary>
         /// insertionLossTextBox control.
         /// </summary>
         /// <remarks>

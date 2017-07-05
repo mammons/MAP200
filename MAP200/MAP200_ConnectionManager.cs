@@ -44,9 +44,10 @@ namespace MAP200
             resourceName = instrumentAddress;
         }
 
-        public void openConnectionToCmr()
+        public void OpenConnectionToCmr()
         {
             logger.Debug("Opening connection to CMR...");
+
             //Instantiates a new object if ioObject is null otherwise uses the existing object
             ioObject = ioObject ?? new FormattedIO488();
 
@@ -71,9 +72,10 @@ namespace MAP200
             }
         }
 
-        public string sendCommandToCmr(string command, bool requestResponse)
+        public string SendCommandToCmr(string command, bool requestResponse)
         {
-            openConnectionToCmr();
+            OpenConnectionToCmr();
+
             if (cmrIsConnected)
             {                
                 try

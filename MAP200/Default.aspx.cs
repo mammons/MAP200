@@ -23,34 +23,50 @@ namespace MAP200
 
             //Event fired if the connection to the MAP200 fails
             map200.conman.MAP200ConnectionFailed += OnMAP200ConnectionFailed;
+
+            if (!IsPostBack)
+            {
+                map200.GetSerialNumber();
+            }
         }
 
         //This button returns the information from the MAP200 CMR or chassis. If anything is returned then we were able to make a connection
         protected void statusBtn_Click(object sender, EventArgs e)
         {
+            CheckMAP200Status();
+        }
+
+        private void CheckMAP200Status()
+        {
             if (map200.IsConnected())
             {
                 writeToLog("MAP200 Connected");
-            }else
+            }
+            else
             {
                 writeToLog("MAP200 Not Connected");
             }
         }
-        
+
         //This button sends the command to start the PCT on the MAP200 which is required to run a test
         protected void startPctBtn_Click(object sender, EventArgs e)
+        {
+            StartPCT();
+        }
+
+        private void StartPCT()
         {
             bool pctRunningOnMap200 = map200.hasPctRunning();
             if (!pctRunningOnMap200)
             {
                 try
                 {
-                    map200.startPct();
+                    map200.StartPct();
                     writeToLog("PCT Started");
                 }
-                catch (TimeoutException)
+                catch (TimeoutException ex)
                 {
-                    writeToLog("Timeout starting the PCT");
+                    writeToLog(ex.Message);
                 }
             }
             else
@@ -62,17 +78,22 @@ namespace MAP200
         //This button stops the PCT
         protected void stopPctBtn_Click(object sender, EventArgs e)
         {
+            StopPCT();
+        }
+
+        private void StopPCT()
+        {
             bool pctRunningOnMap200 = map200.hasPctRunning();
             if (pctRunningOnMap200)
             {
                 try
                 {
-                    map200.stopPct();
+                    map200.StopPct();
                     writeToLog("PCT Stopped");
                 }
-                catch (TimeoutException)
+                catch (TimeoutException ex)
                 {
-                    writeToLog("Timeout stopping the PCT");
+                    writeToLog(ex.Message);
                 }
             }
             else
@@ -84,13 +105,21 @@ namespace MAP200
         //This button runs the test on the PCT which should return the insertion loss, return loss, and length of the jumper
         protected void runBtn_Click(object sender, EventArgs e)
         {
+            RunTest();
+        }
+
+        private void RunTest()
+        {
             if (CheckIfTestingRequired())
             {
                 if (map200.hasPctRunning())
                 {
                     map200.pct.runTest(jumper);
-                    PopulateFieldsWithResults(jumper.results);
+
+                    PopulateFieldsOnPageWithResults(jumper.results);
+
                     jumper.finalResponseMessage = SendResultsToPTS(jumper, map200);
+
                     writeToLog(jumper.jsonResults);
                 }
                 else
@@ -102,8 +131,6 @@ namespace MAP200
             {
                 writeToLog(string.Format("Testing not required for jumper with serial number: {0}", jumper.serialNumber));
             }
-
-            
         }
 
         private TestSetMessage SendResultsToPTS(Jumper jumper, MAP200 testSet)
@@ -139,7 +166,7 @@ namespace MAP200
         /// Fills in the actual fields of the form with the results
         /// </summary>
         /// <param name="results"></param>
-        private void PopulateFieldsWithResults(MAP200_Results results)
+        private void PopulateFieldsOnPageWithResults(MAP200_Results results)
         {
             insertionLossTextBox.Text = jumper.results.InsertionLoss1550SCA.ToString();
             returnLossTextBox.Text = jumper.results.ReturnLoss1550SCA.ToString();

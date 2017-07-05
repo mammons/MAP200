@@ -14,7 +14,7 @@ namespace MAP200
         //Class variables
         public string setInfo { get; set; }
         public string verbosePctStatus {
-            get { return getVerbosePctStatus(); }
+            get { return GetVerbosePctStatus(); }
         }
         public string Location { get; set; } = "CAR";
         public string Model { get; set; } 
@@ -32,28 +32,35 @@ namespace MAP200
         {
             conman = new MAP200_ConnectionManager();
             pct = new PCT();
-            GetSerialNumber();
         }
 
-        public void GetSerialNumber()
+        public bool GetSerialNumber()
         {
-            setInfo = sendCommand("IDN?", requestResponse: true);
-            Model = setInfo.Split(',')[1];
-            SerialNumber = setInfo.Split(',')[2];
+            setInfo = SendCommand("IDN?", requestResponse: true);
+            if (setInfo.Contains("failed"))
+            {
+                return false;
+            }
+            else {
+                Model = setInfo.Split(',')[1];
+                SerialNumber = setInfo.Split(',')[2];
+            }
+            return true;
         }
 
         public bool IsConnected()
         {
-            isConnected = !string.IsNullOrWhiteSpace(sendCommand("IDN?", requestResponse: true));
+            string connCheck = SendCommand("IDN?", requestResponse: true);
+            isConnected = !connCheck.Contains("failed");
             return isConnected;
         }
 
-        public string sendCommand(string command, bool requestResponse)
+        public string SendCommand(string command, bool requestResponse)
         {
-           return conman.sendCommandToCmr(command, requestResponse);            
+           return conman.SendCommandToCmr(command, requestResponse);            
         }
 
-        public string getVerbosePctStatus()
+        public string GetVerbosePctStatus()
         {
             string status;
 
@@ -63,10 +70,10 @@ namespace MAP200
             return status;
         }
 
-        public string getPctStatus()
+        public string GetPctStatus()
         {
             logger.Debug("Getting PCT Status...");
-            string status = sendCommand(":SUPer:STATus? PCT", requestResponse: true);
+            string status = SendCommand(":SUPer:STATus? PCT", requestResponse: true);
             logger.Debug("PCT Status: {0}", status.Trim());
 
             return status;
@@ -78,27 +85,27 @@ namespace MAP200
         /// <returns>True if PCT is running. Otherwise false</returns>
         public bool hasPctRunning()
         {
-            return getPctStatus().Trim().Equals("1");
+            return GetPctStatus().Trim().Equals("1");
         }
 
         /// <summary>
         /// The Launch command does not return a response from the MAP200 so we have to check the status until we get a 1 indicating it's running.
         /// If we don't get a 1 within 5 seconds, we throw a timeout exception
         /// </summary>
-        public void startPct()
+        public void StartPct()
         {
             //send the command to launch the PCT 
-            sendCommand("SUPer:LAUNch PCT", requestResponse: false);
+            SendCommand("SUPer:LAUNch PCT", requestResponse: false);
 
             //create and start the timeout timer
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
 
-            while(getPctStatus().Trim() != "1")
+            while(GetPctStatus().Trim() != "1")
             {
                 Thread.Sleep(500);
-                if (sw.ElapsedMilliseconds > 5000) throw new TimeoutException();
+                if (sw.ElapsedMilliseconds > 5000) throw new TimeoutException("Timed out starting the PCT");
             }
             pct = new PCT();
         }
@@ -107,17 +114,17 @@ namespace MAP200
         /// The exit command does not return a response from the MAP200 so we have to check the status until we get a 0 indicating it's stopped.
         /// If we don't get a 0 within 5 seconds, we throw a timeout exception
         /// </summary>
-        public void stopPct()
+        public void StopPct()
         {
-            sendCommand("SUPer:EXIT PCT", requestResponse: false);
+            SendCommand("SUPer:EXIT PCT", requestResponse: false);
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            while(getPctStatus().Trim() != "0")
+            while(GetPctStatus().Trim() != "0")
             {
                 Thread.Sleep(500);
-                if (sw.ElapsedMilliseconds > 5000) throw new TimeoutException();
+                if (sw.ElapsedMilliseconds > 5000) throw new TimeoutException("Timed out stopping the PCT");
             }
         }
     }

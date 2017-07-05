@@ -17,18 +17,22 @@
             <div class="row">
                 <asp:Label Text="Version 0.4" runat="server" />
                 <div class="form-group">
+                    <div class="value value--serial-number control-label col-md-3">
+                        <asp:Label Text="Serial Number" runat="server" AssociatedControlID="serialNumberTextBox" />
+                        <asp:TextBox ID="serialNumberTextBox" runat="server" CssClass="form-control" placeholder="Enter Serial Number"></asp:TextBox>
+                    </div>
                     <div class="values">
-                        <div class="value value--insertion-loss control-label col-md-4">
+                        <div class="value value--insertion-loss control-label col-md-3">
                             <asp:Label Text="Insertion Loss" runat="server" AssociatedControlID="insertionLossTextBox" />
                             <asp:TextBox ID="insertionLossTextBox" runat="server" CssClass="form-control"></asp:TextBox>
                         </div>
 
-                        <div class="value value--return-loss control-label col-md-4">
+                        <div class="value value--return-loss control-label col-md-3">
                             <asp:Label Text="Return Loss" runat="server" AssociatedControlID="returnLossTextBox" />
                             <asp:TextBox ID="returnLossTextBox" runat="server" CssClass="form-control"></asp:TextBox>
                         </div>
 
-                        <div class="value value--length control-label col-md-4">
+                        <div class="value value--length control-label col-md-3">
                             <asp:Label Text="Length" runat="server" AssociatedControlID="lengthTextBox" />
                             <asp:TextBox ID="lengthTextBox" runat="server" CssClass="form-control"></asp:TextBox>
                         </div>

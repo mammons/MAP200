@@ -36,6 +36,11 @@ namespace MAP200
         public bool isConnected { get; set; }
         public bool isReadyToTest { get; set; }
 
+        public double Aoffset { get; set; } = -0.5;
+        public double Boffset { get; set; } = 0.5;
+        public MAP200_PCTORLMethodEnum ReturnLossMethod { get; set; } = MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodDiscrete;
+        public MAP200_PCTORLOriginEnum ReturnLossOrigin { get; set; } = MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart;
+
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
@@ -131,7 +136,7 @@ namespace MAP200
                 }
 
                 double insertionLoss = IMeas.GetIL();
-                double returnLoss = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, 0.82, 0.82);
+                double returnLoss = IMeas.GetORL(ReturnLossMethod, ReturnLossOrigin, Aoffset, Boffset);
                 double length = IMeas.GetLength();
 
 
@@ -185,7 +190,7 @@ namespace MAP200
                     }
 
                     jumper.results.InsertionLoss1550SCA = IMeas.GetIL();
-                    jumper.results.ReturnLoss1550SCA = IMeas.GetORL(MAP200_PCTORLMethodEnum.MAP200_PCTORLMethodIntegrate, MAP200_PCTORLOriginEnum.MAP200_PCTORLOriginABstart, -0.82, 0.82);
+                    jumper.results.ReturnLoss1550SCA = IMeas.GetORL(Method: ReturnLossMethod, Origin: ReturnLossOrigin, Aoffset: Aoffset, Boffset: Boffset);
                     jumper.results.LengthInMeters = IMeas.GetLength();
                     return true;
                 }
