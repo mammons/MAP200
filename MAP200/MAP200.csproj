@@ -193,14 +193,9 @@
     <Compile Include="MAP200_ConnectionManager.cs" />
     <Compile Include="MAP200_Limits.cs" />
     <Compile Include="MAP200_Results.cs" />
-    <Compile Include="OperationResult.cs" />
     <Compile Include="PCT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PTStransaction.cs" />
-    <Compile Include="TestSetConnection.cs" />
-    <Compile Include="TestSetMessage.cs" />
-    <Compile Include="TestSetMessageHeader.cs" />
-    <Compile Include="TestSetMessageResponse.cs" />
+    <Compile Include="MAP200_PTStransaction.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -252,6 +247,15 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TestSet.Common\TestSetLib.csproj">
+      <Project>{82274ff2-b279-4229-b8d5-f2e1f371c3a5}</Project>
+      <Name>TestSetLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

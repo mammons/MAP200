@@ -3,32 +3,26 @@ using System.Threading;
 using System.Diagnostics;
 using NLog;
 using System.Linq;
+using TestSetLib;
+
+
 
 namespace MAP200
 {
-    public class MAP200
+    public class MAP200 : TestSet
     {
         //Object Variables
         public MAP200_ConnectionManager conman { get; set; }
         public PCT pct { get; set; }
 
         //Class variables
-        public string setInfo { get; set; }
-        public string verbosePctStatus {
+        public string SetInfo { get; set; }
+        public string VerbosePctStatus {
             get { return GetVerbosePctStatus(); }
         }
-        public string Location { get; set; } = "CAR";
-        public string Model { get; set; }
-        public string Name { get; set; } = "DevMap";
-        public string SerialNumber { get; set; }
-        public string OperId { get; set; } = "MRA";
-        private bool isConnected { get; set; }
-        public bool isReadyToTest { get; set; }
 
         //NLog Instance
         private static Logger logger = LogManager.GetCurrentClassLogger();
-
-
 
         public MAP200()
         {
@@ -41,12 +35,12 @@ namespace MAP200
         {
             var op = new OperationResult();
             op = SendCommand("IDN?", requestResponse: true);
-            setInfo = op.Success ? op.Messages[0] : "Could not retrieve set info";
+            SetInfo = op.Success ? op.Messages[0] : "Could not retrieve set info";
 
             if (op.Success)
             {
-                Model = setInfo.Split(',')[1];
-                SerialNumber = setInfo.Split(',')[2];
+                Model = SetInfo.Split(',')[1];
+                SerialNumber = SetInfo.Split(',')[2];
             }
 
             return op.Success;

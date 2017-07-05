@@ -3,6 +3,7 @@ using Ivi.Visa.Interop;
 using System.Threading.Tasks;
 using NLog;
 using System.Linq;
+using TestSetLib;
 
 namespace MAP200
 {

@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using NLog;
 using System.Text.RegularExpressions;
+using TestSetLib;
 
 namespace MAP200
 {
@@ -176,10 +177,11 @@ namespace MAP200
             return op;
         }
 
-        private TestSetMessage SendResultsToPTS(Jumper Jumper, MAP200 testSet)
+        private TestSetMessage SendResultsToPTS(Jumper jumper, MAP200 testSet)
         {
-            PTStransaction pts = new PTStransaction();
-            return pts.SendUPFI(Jumper, testSet);
+            MAP200_PTStransaction pts = new MAP200_PTStransaction();
+            var json = pts.BuildJson(jumper, testSet);
+            return pts.SendUPFI(json);
         }
 
         private bool CheckIfTestingRequired()
@@ -190,19 +192,7 @@ namespace MAP200
         //This button gets the status of the PCT running on the MAP200
         protected void pctStatusBtn_Click(object sender, EventArgs e)
         {
-            WriteToLog(Map200.verbosePctStatus);
-        }
-
-        /// <summary>
-        /// Sends the results to the big log box
-        /// </summary>
-        /// <param name="results"></param>
-        private void populateLogWithResults(IEnumerable<string> results)
-        {
-            foreach(var result in results)
-            {
-                WriteToLog(result);
-            }
+            WriteToLog(Map200.VerbosePctStatus);
         }
 
         /// <summary>

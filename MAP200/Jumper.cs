@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Newtonsoft.Json;
+using TestSetLib;
+using NLog;
 
 namespace MAP200
 {
-    public class Jumper
+    public class Jumper : Fiber
     {
         public string SerialNumber { get; set; } 
         public bool LossTestRequired { get; set; }
@@ -28,6 +30,8 @@ namespace MAP200
             }
         }
 
+        Logger logger = LogManager.GetCurrentClassLogger();
+
         public Jumper()
         {
             Limits = new MAP200_Limits();
@@ -40,8 +44,15 @@ namespace MAP200
                 return true;
             }
             else{
-                PTStransaction pts = new PTStransaction();
-                LossTestRequired = pts.GetTestingRequired(this, testSet);
+                MAP200_PTStransaction pts = new MAP200_PTStransaction();
+                try
+                {
+                    LossTestRequired = pts.GetTestingRequired(this, testSet);
+                }
+                catch(Exception ex)
+                {
+                    logger.Debug(ex.Message);
+                }                
             }
 
             return LossTestRequired;
