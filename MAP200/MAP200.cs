@@ -28,10 +28,10 @@ namespace MAP200
         {
             conman = new MAP200_ConnectionManager();
             pct = new PCT();
-            GetSetInfo();
+            GetTestSetInfo();
         }
 
-        public bool GetSetInfo()
+        public bool GetTestSetInfo()
         {
             var op = new OperationResult();
             op = SendCommand("IDN?", requestResponse: true);

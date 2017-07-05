@@ -31,7 +31,6 @@ namespace MAP200
             //}
         }
 
-        //This button returns the information from the MAP200 CMR or chassis. If anything is returned then we were able to make a connection
         protected void statusBtn_Click(object sender, EventArgs e)
         {
             CheckMAP200Status();

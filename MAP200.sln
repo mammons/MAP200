@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MAP200", "MAP200\MAP200.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSetLib", "TestSet.Common\TestSetLib.csproj", "{82274FF2-B279-4229-B8D5-F2E1F371C3A5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3434030B-C0A2-4AD3-87EF-D39650E18506}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MAP200Tests", "MAP200Tests\MAP200Tests.csproj", "{655629CA-92AD-44BC-BD37-BC9578E33227}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,8 +25,15 @@ Global
 		{82274FF2-B279-4229-B8D5-F2E1F371C3A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82274FF2-B279-4229-B8D5-F2E1F371C3A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82274FF2-B279-4229-B8D5-F2E1F371C3A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{655629CA-92AD-44BC-BD37-BC9578E33227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{655629CA-92AD-44BC-BD37-BC9578E33227}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{655629CA-92AD-44BC-BD37-BC9578E33227}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{655629CA-92AD-44BC-BD37-BC9578E33227}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{655629CA-92AD-44BC-BD37-BC9578E33227} = {3434030B-C0A2-4AD3-87EF-D39650E18506}
 	EndGlobalSection
 EndGlobal
