@@ -28,20 +28,27 @@ namespace MAP200
         }
 
         
-        public bool GetTestingRequired(Jumper jumper, MAP200 testSet)
+        public OperationResult GetTestingRequired(Jumper jumper, MAP200 testSet)
         {
             var json = BuildJson(jumper, testSet);
-            var response = SendREFI(json);
+            var responseMessage = SendREFI(json);
+            var op = new OperationResult();        
 
-            if (response.Success)
+            if (responseMessage.Success)
             {
-                bool testingRequired = response.Body["required"].Equals("yes");
+                bool testingRequired = responseMessage.Body["required"].Equals("yes");
 
-                if (testingRequired) jumper.AssignLimits(response);
-
-                return testingRequired;
+                if (testingRequired) jumper.AssignLimits(responseMessage);
+                op.Success = true;
+                op.Messages.Add(testingRequired.ToString());
             }
-            return false;
+            else
+            {
+                logger.Debug("---ERROR--- UP: {0} RESPONSE: {1}", json, responseMessage);
+                op.Success = false;
+                op.ErrorMessages.Add(responseMessage.Response.Message);
+            }
+            return op;
         }
 
 

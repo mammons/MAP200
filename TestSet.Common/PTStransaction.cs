@@ -21,13 +21,24 @@ namespace TestSetLib
         {
             using (var client = new HttpClient())
             {
+                TestSetMessage responseMessage = new TestSetMessage();
+                HttpResponseMessage httpResponse;
                 client.BaseAddress = new Uri(ServerUri);
 
                 OnPTSMessageSending();
-                HttpResponseMessage httpResponse = client.PostAsJsonAsync<TestSetMessage>(ServiceUrl, json).Result;
-                OnPTSMessageReceived();
+                try
+                {
+                    httpResponse = client.PostAsJsonAsync(ServiceUrl, json).Result;
+                    OnPTSMessageReceived();
+                }
+                catch (Exception ex)
+                {
+                    responseMessage.Success = false;
+                    responseMessage.Response.Message = (string.Format("Could not contact the PTS service. ServiceUrl: {0} , ServerUri: {1}, Error: {2}", ServiceUrl, ServerUri, ex));
+                    return responseMessage;
+                }                
 
-                TestSetMessage responseMessage = new TestSetMessage();
+                
                 if (httpResponse.IsSuccessStatusCode)
                 {
                     try
@@ -35,17 +46,16 @@ namespace TestSetLib
                         responseMessage = httpResponse.Content.ReadAsAsync<TestSetMessage>().Result;
                         responseMessage.Success = true;
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
                         responseMessage = new TestSetMessage();
                         responseMessage.Success = false;
-                        responseMessage.Response.Message = e.Message;
+                        responseMessage.Response.Message = string.Format("PTS service error ServiceUrl: { 0} , ServerUri: { 1}, Error: { 2}", ServiceUrl, ServerUri, ex);
                     }
                 }
                 else
                 {
-                    responseMessage.Response.Message = "Communication with PTS failed";
-                    //logger.Debug("Error: {0} ", responseMessage.Response.Message);
+                    responseMessage.Response.Message = string.Format("Something went wrong communicating with PTS. Response: {0}", httpResponse);
                 }
                 return responseMessage;
             }

@@ -11,11 +11,11 @@ namespace MAP200
 {
     public class MAP200 : TestSet
     {
-        //Object Variables
+
         public MAP200_ConnectionManager conman { get; set; }
         public PCT pct { get; set; }
 
-        //Class variables
+
         public string SetInfo { get; set; }
         public string VerbosePctStatus {
             get { return GetVerbosePctStatus(); }

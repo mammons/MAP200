@@ -10,7 +10,7 @@ namespace MAP200
 {
     public class Jumper : Fiber
     {
-        public string SerialNumber { get; set; } 
+        public string SerialNumber { get; set; }
         public bool LossTestRequired { get; set; }
         public string Commcode { get; set; }
         public MAP200_Limits Limits { get; set; }
@@ -37,25 +37,21 @@ namespace MAP200
             Limits = new MAP200_Limits();
             Results = new MAP200_Results();
         }
-        
-        public bool GetTestingRequired(MAP200 testSet)
-        {
-            if(LossTestRequired){
-                return true;
-            }
-            else{
-                MAP200_PTStransaction pts = new MAP200_PTStransaction();
-                try
-                {
-                    LossTestRequired = pts.GetTestingRequired(this, testSet);
-                }
-                catch(Exception ex)
-                {
-                    logger.Debug(ex.Message);
-                }                
-            }
 
-            return LossTestRequired;
+        public OperationResult GetTestingRequired(MAP200 testSet)
+        {
+            var op = new OperationResult();
+            if (LossTestRequired)
+            {
+                op.Success = true;
+            }
+            else
+            {
+                MAP200_PTStransaction pts = new MAP200_PTStransaction();
+                op = pts.GetTestingRequired(this, testSet);
+                LossTestRequired = op.Messages.Any();
+            }
+            return op;
         }
 
         public void AssignLimits(TestSetMessage response)

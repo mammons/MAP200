@@ -51,94 +51,149 @@ namespace MAP200
         //This button sends the command to start the PCT on the MAP200 which is required to run a test
         protected void startPctBtn_Click(object sender, EventArgs e)
         {
-            StartPCT();
+           var start = StartPCT();
+            if (start.Success)
+            {
+                WriteToLog(start.Messages);
+            }
+            else
+            {
+                WriteToLog(start.ErrorMessages);
+            }
         }
 
-        private void StartPCT()
+        private OperationResult StartPCT()
         {
             bool pctRunningOnMap200 = Map200.HasPctRunning();
+            var op = new OperationResult();
             if (!pctRunningOnMap200)
             {
                 try
                 {
                     Map200.StartPct();
-                    WriteToLog("PCT Started");
+                    op.Success = true;
+                    op.Messages.Add("PCT Started");
                 }
                 catch (TimeoutException ex)
                 {
-                    WriteToLog(ex.Message);
+                    op.Success = false;
+                    op.ErrorMessages.Add(ex.Message);
+                    logger.Debug(op.ErrorMessages);
                 }
             }
             else
             {
-                WriteToLog("PCT already running");
+                op.Success = true;
+                op.Messages.Add("PCT already running");
             }
+            return op;
         }
 
         //This button stops the PCT
         protected void stopPctBtn_Click(object sender, EventArgs e)
         {
-            StopPCT();
+            var stop = StopPCT();
+            if (stop.Success)
+            {
+                WriteToLog(stop.Messages);
+            }
+            else
+            {
+                WriteToLog(stop.ErrorMessages);
+            }
         }
 
-        private void StopPCT()
+        private OperationResult StopPCT()
         {
             bool pctRunningOnMap200 = Map200.HasPctRunning();
+            var op = new OperationResult();
             if (pctRunningOnMap200)
             {
                 try
                 {
                     Map200.StopPct();
-                    WriteToLog("PCT Stopped");
+                    op.Success = true;
+                    op.Messages.Add("PCT Stopped");
                 }
                 catch (TimeoutException ex)
                 {
-                    WriteToLog(ex.Message);
+                    op.Success = false;
+                    op.ErrorMessages.Add(ex.Message);
+                    logger.Debug(op.ErrorMessages);
                 }
             }
             else
             {
-                WriteToLog("PCT already stopped");
+                op.Success = true;
+                op.Messages.Add("PCT already stopped");
             }
+            return op;
         }
 
         //This button runs the test on the PCT which should return the insertion loss, return loss, and length of the jumper
         protected void runBtn_Click(object sender, EventArgs e)
         {
-            RunTest();
+            var button = sender as Button;
+            button.Text = "Running test";
+
+            var testOp = RunTest();
+
+            if (testOp.Success)
+            {
+                PopulateFieldsOnPageWithResults(Jumper.Results);
+
+                Jumper.FinalResponseMessage = SendResultsToPTS(Jumper, Map200);
+                WriteToLog(Jumper.jsonResults);
+            }
+            else
+            {
+                WriteToLog(testOp.ErrorMessages);
+            }
+
+            button.Text = "Run";
         }
 
-        private void RunTest()
+        private OperationResult RunTest()
         {
-            AssignSerialIdToJumper();
+            var testOp = new OperationResult();
+            var assignOp = AssignSerialIdToJumper();
+            var testRequiredOp = CheckIfTestingRequired();
+            if (!assignOp.Success)
+            {
+                WriteToLog(assignOp.ErrorMessages);
+                testOp.Success = false;
+                testOp.ErrorMessages.AddRange(assignOp.ErrorMessages);
+                return testOp;
+            }
 
-            if (CheckIfTestingRequired())
+            var testingRequired = testRequiredOp.Messages.Any();
+            if (testingRequired)
             {
                 if (Map200.HasPctRunning())
                 {
-                    var testOp = new OperationResult();
                     testOp = Map200.pct.RunTest(Jumper);
-
-                    PopulateFieldsOnPageWithResults(Jumper.Results);
-
-                    Jumper.FinalResponseMessage = SendResultsToPTS(Jumper, Map200);
-
-                    WriteToLog(Jumper.jsonResults);
+                    testOp.Messages.Add(string.Format("Jumper {0} completed the test", Jumper.SerialNumber));
                 }
                 else
                 {
-                    WriteToLog("PCT needs to be started before you can run a test");
+                    string msg = "PCT needs to be started before you can run a test";
+                    testOp.Success = false;
+                    testOp.ErrorMessages.Add(msg);
                 }
             }
             else
             {
-                WriteToLog(string.Format("Testing not required for jumper with serial number: {0}", Jumper.SerialNumber));
+                string msg = testRequiredOp.Success ? string.Format("Testing not required for jumper with serial number: {0}", Jumper.SerialNumber) : "No response from PTS";
+                testOp.Success = false;
+                testOp.ErrorMessages.Add(msg);
             }
+
+            return testOp;
         }
 
-        private void AssignSerialIdToJumper()
+        private OperationResult AssignSerialIdToJumper()
         {
-            var op = ValidateSerialNumber();
+            var op = ValidateSerialNumber(serialNumberTextBox.Text);
 
             if (op.Success)
             {
@@ -148,11 +203,12 @@ namespace MAP200
             {
                 WriteToLog(op.ErrorMessages);
             }
+            return op;
         }
 
-        private OperationResult ValidateSerialNumber()
+        public OperationResult ValidateSerialNumber(string serialNumber)
         {
-            var enteredSerialNumber = serialNumberTextBox.Text;
+            var enteredSerialNumber = serialNumber;
             var op = new OperationResult();
             op.Success = true;
 
@@ -183,9 +239,10 @@ namespace MAP200
             return pts.SendUPFI(json);
         }
 
-        private bool CheckIfTestingRequired()
+        private OperationResult CheckIfTestingRequired()
         {
-            return Jumper.GetTestingRequired(Map200);
+            var testingRequired = Jumper.GetTestingRequired(Map200);
+            return testingRequired;
         }
 
         //This button gets the status of the PCT running on the MAP200
