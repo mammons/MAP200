@@ -24,11 +24,6 @@ namespace MAP200
 
             //Event fired if the connection to the MAP200 fails
             Map200.conman.MAP200ConnectionFailed += OnMAP200ConnectionFailed;
-
-            //if (!IsPostBack)
-            //{
-            //    Map200.GetSetInfo();
-            //}
         }
 
         protected void statusBtn_Click(object sender, EventArgs e)
